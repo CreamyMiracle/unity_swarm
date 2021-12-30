@@ -227,7 +227,7 @@ public class Boid
             Vector3 f3 = Move(7f);
             Vector3 f2 = CommonDirectionSteer(2f);
             Vector3 f4 = CollisionDirectionSteer(1f);
-            Vector3 f5 = EnvCollisionSteer(50f);
+            Vector3 f5 = EnvCollisionSteer(100f);
             Vector3 f6 = EnemyCollisionStreer(-100f);
 
             Vector3 resultant = f1 + f2 + f3 + f4 + f5;
@@ -374,15 +374,22 @@ public class Boid
         {
             Boid boid = Env.Boids[i];
             double dist = Distance(boid);
+
             if (boid != this && dist <= VisionRange)
             {
-                if (dist < nearestDist)
+                Rigidbody otherBody = boid.UnityBody.GetComponent<Rigidbody>();
+                Rigidbody thisBody = this.UnityBody.GetComponent<Rigidbody>();
+                float angle = Vector3.Angle(thisBody.transform.forward, otherBody.position - thisBody.position);
+                if (angle >= FOV)
                 {
-                    nearestDist = dist;
-                    NearestNeighbor = boid;
-                }
+                    if (dist < nearestDist)
+                    {
+                        nearestDist = dist;
+                        NearestNeighbor = boid;
+                    }
 
-                Neighbors.Add(boid);
+                    Neighbors.Add(boid);
+                }
             }
         }
     }
@@ -393,6 +400,7 @@ public class Boid
     public float Speed { get; set; } = 1f;
     public float VisionRange { get; set; } = 50f;
     public float Radius { get; set; } = 5f;
+    public float FOV { get; set; } = 70; // 180 degrees = straight ahead, 0 degress = straight behind, 90 degrees = straight left or right
     public List<Boid> Neighbors { get; set; } = new List<Boid>();
     public Boid NearestNeighbor { get; set; } = null;
     public GameObject UnityBody { get; set; } = null;
